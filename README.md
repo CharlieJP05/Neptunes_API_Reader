@@ -2,6 +2,9 @@
 Reads the API from Neptunes Pride and displays it nicely
 
 
+To use:
+create a file called keys.txt in the folder and add your api key to a line, one key per, user 0 in the code is line 0 ect...
+
 Current Features
 -
 
