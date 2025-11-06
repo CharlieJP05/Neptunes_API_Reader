@@ -1,10 +1,18 @@
-import sys, random
+import sys, random, json
 from PySide6 import QtCore, QtGui, QtWidgets
 
+SCALE = 10 # times x y vales by to get to screen size
 # === Star-related classes ===
 
 class StarItem(QtWidgets.QGraphicsEllipseItem):
-    def __init__(self, x, y, size, name):
+    def __init__(self, data):
+        size = 1
+        x = data["x"]*SCALE
+        y = data["y"]*SCALE
+        name = data["n"]
+        exp = data["exp"]
+        puid = data["puid"]
+        v = data["v"]
         super().__init__(-size / 2, -size / 2, size, size)
         self.setPos(x, y)
         self.name = name
@@ -20,7 +28,7 @@ class StarItem(QtWidgets.QGraphicsEllipseItem):
         # Label
         self.label = QtWidgets.QGraphicsSimpleTextItem(name, self)
         self.label.setBrush(QtGui.QBrush(QtCore.Qt.GlobalColor.white))
-        self.label.setPos(size, -size)
+        self.label.setPos(0, size/2)
         self.label.setFlag(QtWidgets.QGraphicsItem.GraphicsItemFlag.ItemIgnoresTransformations)
         self.setFlag(QtWidgets.QGraphicsItem.GraphicsItemFlag.ItemIsSelectable, True)
 
@@ -34,23 +42,15 @@ class StarMapScene(QtWidgets.QGraphicsScene):
         super().__init__()
         self.setSceneRect(-2000, -2000, 4000, 4000)
         self.stars = []
-        self.load_stars(star_count)
-
-    def load_stars(self, star_count):
-        for i in range(star_count):
-            x, y = random.uniform(-1800, 1800), random.uniform(-1800, 1800)
-            size = random.uniform(1.0, 3.0)
-            star = StarItem(x, y, size, f"Star {i}")
-            self.addItem(star)
-            self.stars.append(star)
 
     def update_stars(self, star_data):
         """Generic update method: clears and adds new stars"""
         for star in self.stars:
             self.removeItem(star)
         self.stars.clear()
-        for i, (x, y, size, name) in enumerate(star_data):
-            star = StarItem(x, y, size, name)
+        #print(star_data)
+        for starid, data in star_data.items():
+            star = StarItem(data)
             self.addItem(star)
             self.stars.append(star)
 

@@ -1,5 +1,5 @@
 import requests
-
+import json
 
 def get(user,game):
     with open("keys.txt") as fkey:
@@ -10,5 +10,5 @@ def get(user,game):
     ip = f"https://np.ironhelmet.com/api?game_number={game}&code={key}"
 
     data = requests.get(ip)
-    json = data.text
-    return json
+    json = data.json()
+    return json["scanning_data"]
