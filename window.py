@@ -96,7 +96,6 @@ class StarMapView(QtWidgets.QGraphicsView):
 	def update_labels_visibility(self):
 		# Determines whether star labels should be shown
 		show = self.scale_factor >= self.LABEL_SHOW_SCALE
-		print(show)
 		# Cancels if there is no scene
 		if self.scene() is None:
 			return
