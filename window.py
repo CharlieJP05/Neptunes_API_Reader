@@ -3,14 +3,14 @@ from PySide6 import QtCore, QtGui, QtWidgets
 import api,settings
 
 
-SCALE = 10 # times x y vales by to get to screen size
+SCALE = 100 # times x y vales by to get to screen size
 
 
 # === Star-related classes ===
 
 class StarItem(QtWidgets.QGraphicsEllipseItem):
 	def __init__(self, data):
-		size = 1
+		size = 10
 		x = data["x"]*SCALE
 		y = data["y"]*SCALE
 		name = data["n"]
@@ -54,9 +54,19 @@ class StarItem(QtWidgets.QGraphicsEllipseItem):
 
 
 class StarMapScene(QtWidgets.QGraphicsScene):
-	def __init__(self, star_count=500):
+	def __init__(self):
 		super().__init__()
-		self.setSceneRect(-2000, -2000, 4000, 4000)
+		self.setSceneRect(-1000, -1000, 2000, 2000)
+		# set visual border raround viwe
+		border = QtWidgets.QGraphicsRectItem(self.sceneRect())
+		border.setPen(QtGui.QPen(QtCore.Qt.GlobalColor.green, 2))
+		self.addItem(border)
+
+		self.area = QtWidgets.QGraphicsRectItem(-40,-40,80,80)
+		self.area.setBrush(QtGui.QBrush(QtCore.Qt.GlobalColor.white))
+		self.area.setPen(QtCore.Qt.PenStyle.NoPen)
+		self.area.setPos(0,0)
+		self.stars = []
 		self.stars = []
 
 	def update_stars(self, star_data):
@@ -76,17 +86,36 @@ class StarMapView(QtWidgets.QGraphicsView):
 		self.setRenderHint(QtGui.QPainter.RenderHint.Antialiasing)
 		self.setBackgroundBrush(QtCore.Qt.GlobalColor.black)
 		self.setDragMode(QtWidgets.QGraphicsView.DragMode.ScrollHandDrag)
-		self.scale_factor = 1.0
+		self.scale_factor = 1
+		self.max_scale = 100
 
 	def wheelEvent(self, event):
-		zoom_in = 1.15
-		zoom_out = 1 / zoom_in
-		if event.angleDelta().y() > 0:# and self.scale_factor < 100:
-			zoom = zoom_in
-		else:# self.scale_factor > 0.01:
-			zoom = zoom_out
+		zoom = 1.15 if event.angleDelta().y() > 0 else (1/1.15)
+
+		# current transform scale
+		current_scale = self.transform().m11()
+		new_scale = current_scale * zoom
+
+		# optional: max zoom in limit
+		if zoom > 1 and new_scale > self.max_scale:
+			return
+
+		# ==== Predict the visible scene rect after zoom ====
+		visible_before = self.mapToScene(self.viewport().rect()).boundingRect()
+		predicted_width = visible_before.width() / zoom
+		predicted_height = visible_before.height() / zoom
+
+		scene_full = self.scene().sceneRect()
+
+		# ==== Check if the predicted zoom-out would exceed scene ====
+		if zoom < 1:	# zooming OUT
+			if predicted_width >= scene_full.width() and predicted_height >= scene_full.height(): # TODO decide {and} or, {or}
+				return	# do NOT apply zoom (block it cleanly)
+
+		# Apply zoom (safe)
 		self.scale(zoom, zoom)
-		self.scale_factor *= zoom
+		self.scale_factor = new_scale
+
 
 
 # === Main window ===
@@ -104,7 +133,8 @@ class CanvasWindow(QtWidgets.QMainWindow):
 
 		# Left panel
 		left_panel = QtWidgets.QFrame()
-		left_panel.setFixedWidth(250)
+		left_panel.setMaximumWidth(250)
+		left_panel.setMinimumWidth(200)
 		left_panel.setStyleSheet("background-color: #202020; color: white;")
 		left_layout = QtWidgets.QVBoxLayout(left_panel)
 
