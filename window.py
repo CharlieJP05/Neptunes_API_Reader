@@ -86,8 +86,7 @@ class StarMapView(QtWidgets.QGraphicsView):
 		self.setBackgroundBrush(QtCore.Qt.GlobalColor.black)
 		self.setDragMode(QtWidgets.QGraphicsView.DragMode.ScrollHandDrag)
 		self.scale_factor = 1.0
-
-		self.LABEL_SHOW_SCALE = 10
+		self.max_scale = 200
 		self.is_labels_showing = None
 
 	def wheelEvent(self, event):
@@ -122,7 +121,7 @@ class StarMapView(QtWidgets.QGraphicsView):
 	# Toggles labels based on zoom level
 	def update_labels_visibility(self):
 		# Determines whether star labels should be shown
-		show = self.scale_factor >= self.LABEL_SHOW_SCALE
+		show = self.scale_factor >= SCALE/40
 		# Cancels if there is no scene
 		if self.scene() is None:
 			return
