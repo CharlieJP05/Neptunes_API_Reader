@@ -1,6 +1,5 @@
 from copy import deepcopy
 
-
 class Star:
     _stars_by_id = {}
 
@@ -19,9 +18,7 @@ class Star:
     def __init__(self, data, register=True):
         self.id = data['uid']
         self.visible = bool(data['v'])
-
-        # TODO: Set to player object instead of PUID
-        self.owning_player = data['puid']
+        self._owning_player_id = data['puid']
 
         self.name = data['n']
         self.x = data['x']
@@ -42,6 +39,9 @@ class Star:
         if register:
             self.__class__.register(self)
 
+    def owning_player(self):
+        return Player.get(self._owning_player_id)
+
 class Player:
     _players_by_id = {}
 
@@ -58,12 +58,12 @@ class Player:
         return deepcopy(cls._players_by_id)
 
     def __init__(self, data, register=True):
-        self.id = data['']
+        self.id = data['uid']
         self.name = data['alias']
         self.avatar = data['avatar']
         self.colour = data['color']
         self.shape = data['shape']
-        self.home = Star.get(data['home']) #TODO: Coupling?
+        self._home_id = data['home']
 
         self.total_stars = data['totalStars']
         self.total_fleets = data['totalFleets']
@@ -72,12 +72,61 @@ class Player:
         self.total_industry = data['totalIndustry']
         self.total_science = data['totalScience']
 
+        # Attributes of current player
+        self.credits = data.get('cash')
+        self.ledger = data.get('ledger')
+        self.researching = data.get('researching')
+        self.researching_next = data.get('researchingNext')
+
         self.conceded = bool(data['conceded'])
         self.ai = bool(data['ai'])
         self.regard = data['regard']
         self.tech = data['tech'] #TODO: Tech class?
 
-        #TODO: race, acceptedVassal, offersOfFealty, vassals, karmaToGive, ready, missedTurns
+        #TODO: war + countdown_to_war (current player), race, acceptedVassal, offersOfFealty, vassals, karmaToGive, ready, missedTurns
 
         if register:
             self.__class__.register(self)
+
+    def home(self):
+        return Star.get(self._home_id)
+
+
+class Fleet:
+    _fleets_by_id = {}
+
+    @classmethod
+    def register(cls, fleet):
+        cls._fleets_by_id[fleet.id] = fleet
+
+    @classmethod
+    def get(cls, fleet_id):
+        return cls._fleets_by_id.get(fleet_id)
+
+    @classmethod
+    def get_all(cls):
+        return deepcopy(cls._fleets_by_id)
+
+    def __init__(self, data, register=True):
+        self.id = data['uid']
+        self._owning_player_id = Player.get(data['puid'])
+
+        self.x = data['x']
+        self.y = data['y']
+        self.lx = data['lx']
+        self.ly = data['ly']
+        self.exp = data['exp']
+        self.speed = data['speed']
+
+        self.ship_count = data['st']
+
+        self.lsuid = data.get('lsuid')
+        self.ouid = data['ouid']
+        self.action = data['o']
+        self.loop = bool(data['l'])
+
+        if register:
+            self.__class__.register(self)
+
+    def owning_player(self):
+        return Player.get(self._owning_player_id)
