@@ -106,7 +106,7 @@ class Fleet:
         return cls._fleets_by_id.get(fleet_id)
 
     @classmethod
-    def get_all(cls) -> dict[Fleet]:
+    def get_all(cls) -> dict[int, Fleet]:
         return deepcopy(cls._fleets_by_id)
 
     def __init__(self, data, register=True):
