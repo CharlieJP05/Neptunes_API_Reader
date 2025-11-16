@@ -14,7 +14,7 @@ class Star:
         return cls._stars_by_id.get(star_id)
 
     @classmethod
-    def get_all(cls) -> dict[Star]:
+    def get_all(cls) -> dict[int, Star]:
         return deepcopy(cls._stars_by_id)
 
     def __init__(self, data, register=True):
@@ -56,7 +56,7 @@ class Player:
         return cls._players_by_id.get(player_id)
 
     @classmethod
-    def get_all(cls) -> dict[Player]:
+    def get_all(cls) -> dict[int, Player]:
         return deepcopy(cls._players_by_id)
 
     def __init__(self, data, register=True):
