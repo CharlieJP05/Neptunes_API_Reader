@@ -75,7 +75,7 @@ class StarMapScene(QtWidgets.QGraphicsScene):
 		self.area.setPos(0,0)
 		self.stars = []
 
-	def update_stars(self, stars : dict[Star]):
+	def update_stars(self, stars : dict[int, Star]):
 		"""Generic update method: clears and adds new stars"""
 
 		# Removes all stars from view
